@@ -1,5 +1,5 @@
 # SnapSplitSummary
-Looks at CollectionState.json to give you information about your collection. This will generate two text files;
+Looks at CollectionState.json to give you information about your Marvel Snap collection. This will generate two text files;
 
 output.txt contains a raw alphabetized list of all of your splits.
 
