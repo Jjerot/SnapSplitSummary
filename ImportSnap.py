@@ -1,6 +1,7 @@
 import json
 import re
 import subprocess
+import os
 
 # Define paths for the output files
 OUTPUT_PATH = 'output.txt'
@@ -201,8 +202,8 @@ def summarize_cards(input_file, output_file):
     print(f"HTML summary written to {output_file}")
 
 def main():
-    # Assuming CollectionState.json is placed in the same directory as this script
-    file_path = 'CollectionState.json'
+    # Assuming CollectionState.json is located at ~/AppData/Locallow/Second Dinner/SNAP/Standalone/States/nvprod/
+    file_path = os.path.expanduser('~/AppData/Locallow/Second Dinner/SNAP/Standalone/States/nvprod/CollectionState.json')
 
     # Process the JSON file and generate the output.txt
     if not process_collection_state(file_path):
