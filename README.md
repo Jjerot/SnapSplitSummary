@@ -9,9 +9,11 @@ It will also generates an html file which will pop open in a browser tab to give
 # Warning
 This program does not share your information, everything is run locally on your machine. Always be wary of running unknown code, this program was written with the help of AI, run at your own risk. This does not read or edit your game files directly, you must manually locate the file and create a copy in this programs directory for it to work.  
 # Requirements
-Windows PC 
-Python 3.11 or later (Probably works on earlier versions too, untested. Download from python.org) 
-Marvel Snap installed through Steam, may have to play a game for information to update. 
+-Windows PC 
+
+-Python 3.11 or later (Probably works on earlier versions too, untested. Download from python.org)
+
+-Marvel Snap installed through Steam, may have to play a game for information to update. 
 # Usage
 1. Locate your CollectionState.json, this is typically found in C:\Users\<current user>\AppData\LocalLow\Second Dinner\SNAP\Standalone\States\nvprod
 2. Copy and paste your CollectionState file into the same folder as ImportSnap.py (Do not delete or modify the original file)
