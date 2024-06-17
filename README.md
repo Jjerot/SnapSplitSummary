@@ -11,4 +11,4 @@ This program does not store nor share your information, everything is run locall
 # Usage
 1. Locate your CollectionState.json, this is typically found in C:\Users\<current user>\AppData\LocalLow\Second Dinner\SNAP\Standalone\States\nvprod
 2. Copy and paste your CollectionState file into the same folder as ImportSnap.py
-3. Click and run RunImport.bat
+3. Run RunImport.bat
