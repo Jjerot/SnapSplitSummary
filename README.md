@@ -10,7 +10,7 @@ It will also generates an html file which will pop open in a browser tab to give
 This program does not share your information, everything is run locally on your machine. Always be wary of running unknown code, this program was written with the help of AI, run at your own risk. This does not read or edit your game files directly, you must manually locate the file and create a copy in this programs directory for it to work.  
 # Usage
 1. Locate your CollectionState.json, this is typically found in C:\Users\<current user>\AppData\LocalLow\Second Dinner\SNAP\Standalone\States\nvprod
-2. Copy and paste your CollectionState file into the same folder as ImportSnap.py
+2. Copy and paste your CollectionState file into the same folder as ImportSnap.py (Do not delete or modify the original file)
 3. Run RunImport.bat
 # What the code does exactly;
 CollectionState.json contains a wide variety of information including a full list of all of your cards, variants, and splits. This script looks specifically at the "Cards" subsection and creates a list of cards with a Foil, Prism, Ink, or Gold background, disregarding any custom cards. It only pulls the relevant information and adds tags to Rainbow splits as they aren't displayed in the json the same way colors are, for example Red Krackle flare appears as "SurfaceEffectDefId": "KirbyRed" but Rainbow Krackle flare is simply "Kirby". This is simplified to (name) (background) (flare) such as "AmericaChavez GoldFoil KirbyRainbow"
