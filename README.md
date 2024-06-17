@@ -3,7 +3,7 @@ Looks at CollectionState.json to get information about your Marvel Snap collecti
 
 ![output](https://github.com/Jjerot/SnapSplitSummary/assets/172853898/bb7faecc-86f9-4bca-8a74-cf80798953a6)
 # Warning
-This program does not collect or share your information; everything is run locally on your machine. It will not modify your game files, it simply reads from them. Always be wary of running unknown code. This program was written with the help of AI; run at your own risk.
+This program does not collect or share your information; everything is run locally on your machine. It will not modify your game files, it simply reads from them. Always be wary of running unknown code. This program was written with the help of AI; run at your own risk. If you're uncomfortable with the idea of this script looking into your game folder directly, you can switch to the version 1 branch which reads from a copy of your collectionstate.json that you will have to provide manually. (Copy pasting it into the folder with the script) 
 # Requirements
 -Windows PC 
 
