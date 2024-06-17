@@ -15,7 +15,7 @@ This program does not share your information; everything is run locally on your 
 
 -Marvel Snap installed through Steam, may have to play a game for information to update. 
 # Usage
-1. Locate your CollectionState.json, this is typically found in C:\Users\<current user>\AppData\LocalLow\Second Dinner\SNAP\Standalone\States\nvprod
+1. Locate your CollectionState.json, this is typically found in C:\Users\\{current user}\AppData\LocalLow\Second Dinner\SNAP\Standalone\States\nvprod
 2. Copy and paste your CollectionState file into the same folder as ImportSnap.py (Do not delete or modify the original file)
 3. Run RunImport.bat
 # What the code does exactly;
