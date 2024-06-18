@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Define paths for the output files
 OUTPUT_PATH = 'output.txt'
-SUMMARY_PATH = 'summary.html'  # Changed to HTML file
+SUMMARY_PATH = 'summary.html'
 
 def extract_cards_section(file_path):
     with open(file_path, 'r', encoding='utf-8-sig') as file:
@@ -218,8 +218,23 @@ def summarize_cards(input_file, output_file):
         percentage = (count / total_splits) * 100
         html_content += f"<li>{color}: {count} ({percentage:.2f}%)</li>"
 
+    # Append additional stats to HTML content
     html_content += """
         </ul>
+        <h3>Additional Stats</h3>
+    """
+
+    luckiest_card, unluckiest_card, streaks, longest_ink_drought, longest_gold_drought, longest_kirby_drought = additional_stats(input_file)
+
+    html_content += f"""
+        <p><strong>Your lucky character:</strong> {luckiest_card}</p>
+        <p><strong>Your nemesis:</strong> {unluckiest_card}</p>
+        <p><strong>Highest Ink Streak:</strong> {streaks['highest_ink_streak']['length']} ({', '.join(streaks['highest_ink_streak']['cards'])})</p>
+        <p><strong>Longest Ink drought:</strong> {longest_ink_drought[1]['Max Ink Drought']} ({longest_ink_drought[0]})</p>
+        <p><strong>Highest Gold Streak:</strong> {streaks['highest_gold_streak']['length']} ({', '.join(streaks['highest_gold_streak']['cards'])})</p>
+        <p><strong>Longest Gold drought:</strong> {longest_gold_drought[1]['Max Gold Drought']} ({longest_gold_drought[0]})</p>
+        <p><strong>Highest Kirby Streak:</strong> {streaks['highest_kirby_streak']['length']} ({', '.join(streaks['highest_kirby_streak']['cards'])})</p>
+        <p><strong>Longest Kirby drought:</strong> {longest_kirby_drought[1]['Max Kirby Drought']} ({longest_kirby_drought[0]})</p>
     </body>
     </html>
     """
@@ -256,6 +271,18 @@ Most Split Characters
         percentage = (count / total_splits) * 100
         summary_text += f"{color}: {count} ({percentage:.2f}%)\n"
 
+    summary_text += f"""
+Your lucky character is {luckiest_card}
+Your nemesis is {unluckiest_card}
+
+Highest Ink Streak: {streaks['highest_ink_streak']['length']} ({', '.join(streaks['highest_ink_streak']['cards'])})
+Longest Ink drought: {longest_ink_drought[1]['Max Ink Drought']} ({longest_ink_drought[0]})
+Highest Gold Streak: {streaks['highest_gold_streak']['length']} ({', '.join(streaks['highest_gold_streak']['cards'])})
+Longest Gold drought: {longest_gold_drought[1]['Max Gold Drought']} ({longest_gold_drought[0]})
+Highest Kirby Streak: {streaks['highest_kirby_streak']['length']} ({', '.join(streaks['highest_kirby_streak']['cards'])})
+Longest Kirby drought: {longest_kirby_drought[1]['Max Kirby Drought']} ({longest_kirby_drought[0]})
+"""
+
     try:
         with open(OUTPUT_PATH, 'w', encoding='utf-8') as outfile:
             outfile.write(summary_text)
@@ -264,6 +291,181 @@ Most Split Characters
         print("Summary statistics added to output.txt")
     except IOError as e:
         print(f"Error: IOError - {e}")
+
+def additional_stats(input_file):
+    cards = parse_output_file(input_file)
+    card_luck, card_rolls = calculate_luck(cards)
+    streaks = find_streaks(cards, card_rolls)
+    longest_ink_drought, longest_gold_drought, longest_kirby_drought = track_droughts(cards)
+
+    luckiest_card = format_card_name(max(card_luck, key=card_luck.get))
+    unluckiest_card = format_card_name(min(card_luck, key=card_luck.get))
+
+    longest_ink_drought = (format_card_name(longest_ink_drought[0]), longest_ink_drought[1])
+    longest_gold_drought = (format_card_name(longest_gold_drought[0]), longest_gold_drought[1])
+    longest_kirby_drought = (format_card_name(longest_kirby_drought[0]), longest_kirby_drought[1])
+
+    return luckiest_card, unluckiest_card, streaks, longest_ink_drought, longest_gold_drought, longest_kirby_drought
+
+def parse_output_file(file_path):
+    cards = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split()
+            if len(parts) == 3 and is_valid_date(parts[2]):
+                card_def_id, surface_effect_def_id, time_created = parts
+                reveal_effect_def_id = ""
+            elif len(parts) == 4 and is_valid_date(parts[3]):
+                card_def_id, surface_effect_def_id, reveal_effect_def_id, time_created = parts
+            else:
+                continue  # Skip lines that don't match the expected format
+            cards.append((card_def_id, surface_effect_def_id, reveal_effect_def_id, time_created))
+    return cards
+
+def is_valid_date(date_str):
+    try:
+        datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+        return True
+    except ValueError:
+        return False
+
+def calculate_luck(cards):
+    card_luck = {}
+    card_rolls = {}
+    for card in cards:
+        card_def_id = card[0]
+        reveal_effect_def_id = card[2]
+        surface_effect_def_id = card[1]
+        
+        if card_def_id not in card_rolls:
+            card_rolls[card_def_id] = 0
+        card_rolls[card_def_id] += 1
+
+        if card_def_id not in card_luck:
+            card_luck[card_def_id] = 0
+
+        # Calculate expected rolls
+        roll_number = card_rolls[card_def_id]
+        if roll_number >= 4:
+            card_luck[card_def_id] -= 1  # Negative for every possible roll
+        if roll_number >= 6:
+            card_luck[card_def_id] -= 1  # Additional negative for Kirby roll
+
+        # Calculate actual outcomes
+        if "Ink" in surface_effect_def_id:
+            card_luck[card_def_id] += 5  # Positive for hitting Ink
+        if "Gold" in surface_effect_def_id:
+            card_luck[card_def_id] += 5  # Positive for hitting Gold
+        if "Kirby" in reveal_effect_def_id:
+            card_luck[card_def_id] += 5  # Positive for hitting Kirby
+        if "Ink" in surface_effect_def_id and "Kirby" in reveal_effect_def_id:
+            card_luck[card_def_id] += 5  # Additional bonus for both
+        if "Gold" in surface_effect_def_id and "Kirby" in reveal_effect_def_id:
+            card_luck[card_def_id] += 5  # Additional bonus for both
+
+    return card_luck, card_rolls
+
+def format_card_name(card_name):
+    return re.sub(r'(?<!^)(?=[A-Z])', ' ', card_name)
+
+def track_droughts(cards):
+    card_stats = {}
+
+    for card in cards:
+        card_def_id = card[0]
+        surface_effect_def_id = card[1]
+        reveal_effect_def_id = card[2]
+
+        if card_def_id not in card_stats:
+            card_stats[card_def_id] = {
+                "Eligibility counter": 1,
+                "Ink Drought": 0,
+                "Max Ink Drought": 0,
+                "Gold Drought": 0,
+                "Max Gold Drought": 0,
+                "Kirby Drought": 0,
+                "Max Kirby Drought": 0,
+            }
+        else:
+            card_stats[card_def_id]["Eligibility counter"] += 1
+
+        # Ink Drought
+        if card_stats[card_def_id]["Eligibility counter"] >= 4:
+            if "Ink" not in surface_effect_def_id:
+                card_stats[card_def_id]["Ink Drought"] += 1
+                if card_stats[card_def_id]["Ink Drought"] > card_stats[card_def_id]["Max Ink Drought"]:
+                    card_stats[card_def_id]["Max Ink Drought"] = card_stats[card_def_id]["Ink Drought"]
+            else:
+                card_stats[card_def_id]["Ink Drought"] = 0
+
+        # Gold Drought
+        if card_stats[card_def_id]["Eligibility counter"] >= 5:
+            if "Gold" not in surface_effect_def_id:
+                card_stats[card_def_id]["Gold Drought"] += 1
+                if card_stats[card_def_id]["Gold Drought"] > card_stats[card_def_id]["Max Gold Drought"]:
+                    card_stats[card_def_id]["Max Gold Drought"] = card_stats[card_def_id]["Gold Drought"]
+            else:
+                card_stats[card_def_id]["Gold Drought"] = 0
+
+        # Kirby Drought
+        if card_stats[card_def_id]["Eligibility counter"] >= 6:
+            if "Kirby" not in reveal_effect_def_id:
+                card_stats[card_def_id]["Kirby Drought"] += 1
+                if card_stats[card_def_id]["Kirby Drought"] > card_stats[card_def_id]["Max Kirby Drought"]:
+                    card_stats[card_def_id]["Max Kirby Drought"] = card_stats[card_def_id]["Kirby Drought"]
+            else:
+                card_stats[card_def_id]["Kirby Drought"] = 0
+
+    longest_ink_drought = max(card_stats.items(), key=lambda x: x[1]["Max Ink Drought"])
+    longest_gold_drought = max(card_stats.items(), key=lambda x: x[1]["Max Gold Drought"])
+    longest_kirby_drought = max(card_stats.items(), key=lambda x: x[1]["Max Kirby Drought"])
+
+    return longest_ink_drought, longest_gold_drought, longest_kirby_drought
+
+def find_streaks(cards, card_rolls):
+    streaks = {
+        "highest_ink_streak": {"length": 0, "cards": []},
+        "highest_gold_streak": {"length": 0, "cards": []},
+        "highest_kirby_streak": {"length": 0, "cards": []}
+    }
+
+    current_streak = {
+        "ink": [],
+        "gold": [],
+        "kirby": []
+    }
+
+    for card in cards:
+        card_def_id = format_card_name(card[0])
+        reveal_effect_def_id = card[2]
+        surface_effect_def_id = card[1]
+        roll_number = card_rolls[card[0]]
+
+        # Handle ink streaks
+        if "Ink" in surface_effect_def_id:
+            current_streak["ink"].append(card_def_id)
+            if len(current_streak["ink"]) > streaks["highest_ink_streak"]["length"]:
+                streaks["highest_ink_streak"] = {"length": len(current_streak["ink"]), "cards": current_streak["ink"]}
+        else:
+            current_streak["ink"] = []
+
+        # Handle gold streaks
+        if "Gold" in surface_effect_def_id:
+            current_streak["gold"].append(card_def_id)
+            if len(current_streak["gold"]) > streaks["highest_gold_streak"]["length"]:
+                streaks["highest_gold_streak"] = {"length": len(current_streak["gold"]), "cards": current_streak["gold"]}
+        else:
+            current_streak["gold"] = []
+
+        # Handle kirby streaks
+        if "Kirby" in reveal_effect_def_id:
+            current_streak["kirby"].append(card_def_id)
+            if len(current_streak["kirby"]) > streaks["highest_kirby_streak"]["length"]:
+                streaks["highest_kirby_streak"] = {"length": len(current_streak["kirby"]), "cards": current_streak["kirby"]}
+        else:
+            current_streak["kirby"] = []
+
+    return streaks
 
 def main():
     # Assuming CollectionState.json is located at ~/AppData/Locallow/Second Dinner/SNAP/Standalone/States/nvprod/
