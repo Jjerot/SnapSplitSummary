@@ -158,6 +158,9 @@ def summarize_cards(input_file, output_file):
     # Sort colors by count in descending order
     sorted_colors = sorted(color_counts.items(), key=lambda item: item[1], reverse=True)
 
+    # Get additional statistics
+    luckiest_card, unluckiest_card, streaks, longest_ink_drought, longest_gold_drought, longest_kirby_drought = additional_stats(input_file)
+
     # Generate HTML content
     html_content = f"""
     <!DOCTYPE html>
@@ -166,44 +169,38 @@ def summarize_cards(input_file, output_file):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Game Data Summary</title>
-        <style>
-            body {{
-                background-color: #222;
-                color: #fff;
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                padding: 10px;
-                max-width: 600px; /* Limit width to 600px */
-            }}
-            h2 {{
-                border-bottom: 2px solid #ccc;
-                padding-bottom: 5px;
-            }}
-            p {{
-                margin: 5px 0;
-            }}
-            ul {{
-                list-style-type: none;
-                padding: 0;
-            }}
-            li {{
-                margin-bottom: 5px;
-            }}
-        </style>
+        <link rel="stylesheet" href="styles.css">
     </head>
     <body>
-        <h2>Game Data Summary</h2>
-        <p><strong>Total splits:</strong> {total_splits}</p>
-        <p><strong>Ink Rolls:</strong> {ink_rolls}</p>
-        <p><strong>Ink Hits:</strong> {ink_hits} ({ink_hits_percentage:.2f}%)</p>
-        <p><strong>Gold Rolls:</strong> {gold_rolls}</p>
-        <p><strong>Gold Hits:</strong> {gold_hits} ({gold_hits_percentage:.2f}%)</p>
-        <p><strong>Kirby Rolls:</strong> {krackle_rolls}</p>
-        <p><strong>Kirby Hits:</strong> {krackle_hits} ({krackle_hits_percentage:.2f}%)</p>
-        <p><strong>Ink & Kirby Hits:</strong> {ink_krackle_hits} ({ink_krackle_hits_percentage:.2f}%)</p>
-        <p><strong>Gold & Kirby Hits:</strong> {gold_krackle_hits} ({gold_krackle_hits_percentage:.2f}%)</p>
-        <h3>Most Split Characters</h3>
-        <ul>
+        <div class="popup">
+            <div class="header">
+                <h1>Game Data Summary</h1>
+            </div>
+            <div class="columns">
+                <div class="column left">
+                    <h2>Your Lucky Character:</h2>
+                    <p>{luckiest_card}</p>
+                    <br>
+                    <p>Highest Ink Streak: {streaks['highest_ink_streak']['length']}</p>
+                    <p class="cards">{', '.join(streaks['highest_ink_streak']['cards'])}</p>
+                    <p>Highest Gold Streak: {streaks['highest_gold_streak']['length']}</p>
+                    <p class="cards">{', '.join(streaks['highest_gold_streak']['cards'])}</p>
+                    <p>Highest Kirby Streak: {streaks['highest_kirby_streak']['length']}</p>
+                    <p class="cards">{', '.join(streaks['highest_kirby_streak']['cards'])}</p>
+                </div>
+                <div class="column center">
+                    <h2>Statistics</h2>
+                    <p>Total splits: {total_splits}</p>
+                    <p>Ink Rolls: {ink_rolls}</p>
+                    <p>Ink Hits: {ink_hits} ({ink_hits_percentage:.2f}%)</p>
+                    <p>Gold Rolls: {gold_rolls}</p>
+                    <p>Gold Hits: {gold_hits} ({gold_hits_percentage:.2f}%)</p>
+                    <p>Kirby Rolls: {krackle_rolls}</p>
+                    <p>Kirby Hits: {krackle_hits} ({krackle_hits_percentage:.2f}%)</p>
+                    <p>Ink & Kirby Hits: {ink_krackle_hits} ({ink_krackle_hits_percentage:.2f}%)</p>
+                    <p>Gold & Kirby Hits: {gold_krackle_hits} ({gold_krackle_hits_percentage:.2f}%)</p>
+                    <h2>Most Split Characters</h2>
+                    <ul>
     """
 
     # Get top 3 cards with the most copies
@@ -211,7 +208,7 @@ def summarize_cards(input_file, output_file):
     for card, count in sorted_card_counts:
         html_content += f"<li>{card} - {count} copies</li>"
 
-    html_content += "</ul><h3>Color Counts</h3><ul>"
+    html_content += "</ul><h2>Flare Color Breakdown</h2><ul>"
 
     # Add sorted color counts to HTML content
     for color, count in sorted_colors:
@@ -219,22 +216,22 @@ def summarize_cards(input_file, output_file):
         html_content += f"<li>{color}: {count} ({percentage:.2f}%)</li>"
 
     # Append additional stats to HTML content
-    html_content += """
-        </ul>
-        <h3>Additional Stats</h3>
-    """
-
-    luckiest_card, unluckiest_card, streaks, longest_ink_drought, longest_gold_drought, longest_kirby_drought = additional_stats(input_file)
-
     html_content += f"""
-        <p><strong>Your lucky character:</strong> {luckiest_card}</p>
-        <p><strong>Your nemesis:</strong> {unluckiest_card}</p>
-        <p><strong>Highest Ink Streak:</strong> {streaks['highest_ink_streak']['length']} ({', '.join(streaks['highest_ink_streak']['cards'])})</p>
-        <p><strong>Longest Ink drought:</strong> {longest_ink_drought[1]['Max Ink Drought']} ({longest_ink_drought[0]})</p>
-        <p><strong>Highest Gold Streak:</strong> {streaks['highest_gold_streak']['length']} ({', '.join(streaks['highest_gold_streak']['cards'])})</p>
-        <p><strong>Longest Gold drought:</strong> {longest_gold_drought[1]['Max Gold Drought']} ({longest_gold_drought[0]})</p>
-        <p><strong>Highest Kirby Streak:</strong> {streaks['highest_kirby_streak']['length']} ({', '.join(streaks['highest_kirby_streak']['cards'])})</p>
-        <p><strong>Longest Kirby drought:</strong> {longest_kirby_drought[1]['Max Kirby Drought']} ({longest_kirby_drought[0]})</p>
+                    </ul>
+                </div>
+                <div class="column right">
+                    <h2>Your Nemesis:</h2>
+                    <p>{unluckiest_card}</p>
+                    <br>
+                    <p>Longest Ink drought: {longest_ink_drought[1]['Max Ink Drought']}</p>
+                    <p class="cards">{longest_ink_drought[0]}</p>
+                    <p>Longest Gold drought: {longest_gold_drought[1]['Max Gold Drought']}</p>
+                    <p class="cards">{longest_gold_drought[0]}</p>
+                    <p>Longest Kirby drought: {longest_kirby_drought[1]['Max Kirby Drought']}</p>
+                    <p class="cards">{longest_kirby_drought[0]}</p>
+                </div>
+            </div>
+        </div>
     </body>
     </html>
     """
