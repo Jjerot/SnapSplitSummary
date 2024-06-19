@@ -1,7 +1,7 @@
 # SnapSplitSummary
 Looks at CollectionState.json to get information about your Marvel Snap collection and various split statistics. This will generate a raw chronological list of all of your splits in output.txt as well as an HTML file that will pop open in a browser tab to give you a quick overview of the results after running the script.
 
-![summary3](https://github.com/Jjerot/SnapSplitSummary/assets/172853898/62851f2f-00cf-467e-a21d-2ba8bff2a422)
+![sumv4](https://github.com/Jjerot/SnapSplitSummary/assets/172853898/0000240b-047f-4997-bf85-302c9255cefc)
 
 # Warning
 This program does not collect or share your information; everything is run locally on your machine. It will not modify your game files, it simply reads from them. Always be wary of running unknown code. This program was written with the help of AI; run at your own risk. If you're uncomfortable with the idea of this script looking into your game folder directly, you can switch to the version 1 branch which reads from a copy of your collectionstate.json that you will have to provide manually. (Copy pasting it into the folder with the script) 
