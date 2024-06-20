@@ -11,11 +11,13 @@ This program does not collect or share your information; everything is run local
 -Marvel Snap installed through Steam, may have to play a game for information to update. 
 
 # Usage
+Downloading for new users: on the right hand side of the page below the "About" section, under "Releases" click "Snap Split Summary (Latest)"
+
 Release version:
-1. Unzip folder
+1. Unzip SnapSplitSummary.zip
 2. Run ImportSnap.exe
    
-Alternatively, if you are uncomfortable downloading it as an .exe, I've included a batch file with source code.
+Alternatively, if you are uncomfortable downloading it as an .exe, I've included a batch file in the Source Code.
 
 1. Unzip folder
 2. Click ImportSnap.bat
