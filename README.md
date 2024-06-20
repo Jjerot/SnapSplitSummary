@@ -31,7 +31,7 @@ It then goes through the cleaned output to generate a summary which includes;
 
 -Total of all splits
 
--The number of each background and flare and total number of possible rolls for each
+-The number of each background and flare you've found and how many times splits could have rolled them
 
 -A count of all flare colors
 
