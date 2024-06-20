@@ -5,7 +5,8 @@ import os
 from datetime import datetime
 
 # Define paths for the output files
-OUTPUT_PATH = 'output.txt'
+RAWLIST_PATH = 'rawlist.txt'
+STATISTICS_PATH = 'statistics.txt'
 SUMMARY_PATH = 'summary.html'
 
 def extract_cards_section(file_path):
@@ -71,223 +72,283 @@ def process_collection_state(file_path):
 
     # Write sorted information to a text file
     try:
-        with open(OUTPUT_PATH, 'w', encoding='utf-8') as outfile:
+        with open(RAWLIST_PATH, 'w', encoding='utf-8') as outfile:
             for card_info in cards_info:
                 card_str = f"{card_info[0]} {card_info[1]} {card_info[2]} {card_info[3]}"
                 outfile.write(f"{card_str}\n")
 
-        print("Output written to output.txt")
+        print("Output written to rawlist.txt")
         return True
     except IOError as e:
         print(f"Error: IOError - {e}")
         return False
 
-def summarize_cards(input_file, output_file):
-    """Summarize the card information and generate HTML output."""
+def analyze_statistics(input_file, output_file):
+    """Analyze the card information and generate statistics."""
     # Read the input file
     with open(input_file, 'r') as file:
         lines = file.readlines()
 
-    # Dictionary to count occurrences of each card
+    # Initialize counters
     card_counts = {}
     total_splits = 0
+    foil_hits = 0
+    prism_hits = 0
+    comic_glimmer_rolls = 0
+    comic_hits = 0
+    glimmer_hits = 0
+    ink_rolls = 0
     ink_hits = 0
+    gold_rolls = 0
     gold_hits = 0
-    krackle_hits = 0
-    ink_krackle_hits = 0
-    gold_krackle_hits = 0
+    sparkle_hits = 0
+    kirby_rolls = 0
+    kirby_hits = 0
 
-    # Dictionary to count color occurrences
-    color_counts = {
-        "Black": 0,
-        "Gold": 0,
-        "Green": 0,
-        "Blue": 0,
-        "Red": 0,
-        "White": 0,
-        "Purple": 0,
-        "Rainbow": 0
-    }
+    split_2_3_total = 0
+    split_2_3_foil_count = 0
+    split_2_3_prism_count = 0
+    split_2_3_comic_count = 0
+    split_2_3_glimmer_count = 0
+
+    split_4_total = 0
+    split_4_foil_count = 0
+    split_4_prism_count = 0
+    split_4_ink_count = 0
+    split_4_comic_count = 0
+    split_4_glimmer_count = 0
+    split_4_sparkle_count = 0
+
+    split_5_total = 0
+    split_5_foil_count = 0
+    split_5_prism_count = 0
+    split_5_ink_count = 0
+    split_5_gold_count = 0
+    split_5_comic_count = 0
+    split_5_glimmer_count = 0
+    split_5_sparkle_count = 0
+
+    split_6_total = 0
+    split_6_foil_count = 0
+    split_6_prism_count = 0
+    split_6_ink_count = 0
+    split_6_gold_count = 0
+    split_6_comic_count = 0
+    split_6_glimmer_count = 0
+    split_6_sparkle_count = 0
+    split_6_kirby_count = 0
 
     for line in lines:
         total_splits += 1
         parts = line.split()
         card_name = parts[0]
+        surface_effect_def_id = parts[1]
+        reveal_effect_def_id = parts[2] if len(parts) > 2 else ""
 
         if card_name in card_counts:
             card_counts[card_name] += 1
         else:
             card_counts[card_name] = 1
 
-        # Check for additional criteria
-        if "Ink" in line:
-            ink_hits += 1
-        if "GoldFoil" in line:
-            gold_hits += 1
-        if "Kirby" in line:
-            krackle_hits += 1
-        if "Ink" in line and "Kirby" in line:
-            ink_krackle_hits += 1
-        if "GoldFoil" in line and "Kirby" in line:
-            gold_krackle_hits += 1
+        # Count surface effects
+        if "Foil" in surface_effect_def_id and "PrismFoil" not in surface_effect_def_id and "GoldFoil" not in surface_effect_def_id:
+            foil_hits += 1
+        if "PrismFoil" in surface_effect_def_id:
+            prism_hits += 1
 
-        # Check for colors in the reveal effect
-        for color in color_counts.keys():
-            if color in parts[2]:
-                color_counts[color] += 1
+        # Count reveal effects
+        if card_counts[card_name] > 1:
+            comic_glimmer_rolls += 1
+            if "Comic" in reveal_effect_def_id:
+                comic_hits += 1
+            if "Glimmer" in reveal_effect_def_id:
+                glimmer_hits += 1
 
-    # Calculate Ink Rolls, Gold Rolls, and Krackle Rolls
-    ink_rolls = 0
-    gold_rolls = 0
-    krackle_rolls = 0
-    for count in card_counts.values():
-        if count >= 4:
-            ink_rolls += (count - 3)
-        if count >= 5:
-            gold_rolls += (count - 4)
-        if count >= 6:
-            krackle_rolls += (count - 5)
+        # Count ink rolls and hits
+        if card_counts[card_name] >= 4:
+            ink_rolls += 1
+            if "Ink" in surface_effect_def_id:
+                ink_hits += 1
 
-    # Calculate percentages relative to their respective rolls
-    ink_hits_percentage = (ink_hits / ink_rolls) * 100 if ink_rolls > 0 else 0
-    gold_hits_percentage = (gold_hits / gold_rolls) * 100 if gold_rolls > 0 else 0
-    krackle_hits_percentage = (krackle_hits / krackle_rolls) * 100 if krackle_rolls > 0 else 0
-    ink_krackle_hits_percentage = (ink_krackle_hits / krackle_rolls) * 100 if krackle_rolls > 0 else 0
-    gold_krackle_hits_percentage = (gold_krackle_hits / krackle_rolls) * 100 if krackle_rolls > 0 else 0
+        # Count gold rolls and hits
+        if card_counts[card_name] >= 5:
+            gold_rolls += 1
+            if "GoldFoil" in surface_effect_def_id:
+                gold_hits += 1
+            if "Sparkle" in reveal_effect_def_id:
+                sparkle_hits += 1
 
-    # Sort colors by count in descending order
-    sorted_colors = sorted(color_counts.items(), key=lambda item: item[1], reverse=True)
+        # Count kirby rolls and hits
+        if card_counts[card_name] >= 6:
+            kirby_rolls += 1
+            if "Kirby" in reveal_effect_def_id:
+                kirby_hits += 1
 
-    # Get additional statistics
-    luckiest_card, unluckiest_card, streaks, longest_ink_drought, longest_gold_drought, longest_kirby_drought = additional_stats(input_file)
+        # Split 2-3 specific counts
+        if card_counts[card_name] in [2, 3]:
+            split_2_3_total += 1
+            if "Foil" in surface_effect_def_id and "PrismFoil" not in surface_effect_def_id and "GoldFoil" not in surface_effect_def_id:
+                split_2_3_foil_count += 1
+            if "PrismFoil" in surface_effect_def_id:
+                split_2_3_prism_count += 1
+            if "Comic" in reveal_effect_def_id:
+                split_2_3_comic_count += 1
+            if "Glimmer" in reveal_effect_def_id:
+                split_2_3_glimmer_count += 1
 
-    # Generate HTML content
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Game Data Summary</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-        <div class="popup">
-            <div class="header">
-                <h1>Game Data Summary</h1>
-            </div>
-            <div class="columns">
-                <div class="column left">
-                    <h2>Your Lucky Character:</h2>
-                    <p>{luckiest_card}</p>
-                    <br>
-                    <p>Highest Ink Streak: {streaks['highest_ink_streak']['length']}</p>
-                    <p class="cards">{', '.join(streaks['highest_ink_streak']['cards'])}</p>
-                    <p>Highest Gold Streak: {streaks['highest_gold_streak']['length']}</p>
-                    <p class="cards">{', '.join(streaks['highest_gold_streak']['cards'])}</p>
-                    <p>Highest Kirby Streak: {streaks['highest_kirby_streak']['length']}</p>
-                    <p class="cards">{', '.join(streaks['highest_kirby_streak']['cards'])}</p>
-                </div>
-                <div class="column center">
-                    <h2>Statistics</h2>
-                    <p>Total splits: {total_splits}</p>
-                    <p>Ink Rolls: {ink_rolls}</p>
-                    <p>Ink Hits: {ink_hits} ({ink_hits_percentage:.2f}%)</p>
-                    <p>Gold Rolls: {gold_rolls}</p>
-                    <p>Gold Hits: {gold_hits} ({gold_hits_percentage:.2f}%)</p>
-                    <p>Kirby Rolls: {krackle_rolls}</p>
-                    <p>Kirby Hits: {krackle_hits} ({krackle_hits_percentage:.2f}%)</p>
-                    <p>Ink & Kirby Hits: {ink_krackle_hits} ({ink_krackle_hits_percentage:.2f}%)</p>
-                    <p>Gold & Kirby Hits: {gold_krackle_hits} ({gold_krackle_hits_percentage:.2f}%)</p>
-                    <h2>Most Split Characters</h2>
-                    <ul>
-    """
+        # Split 4 specific counts
+        if card_counts[card_name] == 4:
+            split_4_total += 1
+            if "Foil" in surface_effect_def_id and "PrismFoil" not in surface_effect_def_id and "GoldFoil" not in surface_effect_def_id:
+                split_4_foil_count += 1
+            if "PrismFoil" in surface_effect_def_id:
+                split_4_prism_count += 1
+            if "Ink" in surface_effect_def_id:
+                split_4_ink_count += 1
+            if "Comic" in reveal_effect_def_id:
+                split_4_comic_count += 1
+            if "Glimmer" in reveal_effect_def_id:
+                split_4_glimmer_count += 1
+            if "Sparkle" in reveal_effect_def_id:
+                split_4_sparkle_count += 1
 
-    # Get top 3 cards with the most copies
-    sorted_card_counts = sorted(card_counts.items(), key=lambda item: item[1], reverse=True)[:3]
-    for card, count in sorted_card_counts:
-        html_content += f"<li>{card} - {count} copies</li>"
+        # Split 5 specific counts
+        if card_counts[card_name] == 5:
+            split_5_total += 1
+            if "Foil" in surface_effect_def_id and "PrismFoil" not in surface_effect_def_id and "GoldFoil" not in surface_effect_def_id:
+                split_5_foil_count += 1
+            if "PrismFoil" in surface_effect_def_id:
+                split_5_prism_count += 1
+            if "Ink" in surface_effect_def_id:
+                split_5_ink_count += 1
+            if "GoldFoil" in surface_effect_def_id:
+                split_5_gold_count += 1
+            if "Comic" in reveal_effect_def_id:
+                split_5_comic_count += 1
+            if "Glimmer" in reveal_effect_def_id:
+                split_5_glimmer_count += 1
+            if "Sparkle" in reveal_effect_def_id:
+                split_5_sparkle_count += 1
 
-    html_content += "</ul><h2>Flare Color Breakdown</h2><ul>"
+        # Split 6 specific counts
+        if card_counts[card_name] == 6:
+            split_6_total += 1
+            if "Foil" in surface_effect_def_id and "PrismFoil" not in surface_effect_def_id and "GoldFoil" not in surface_effect_def_id:
+                split_6_foil_count += 1
+            if "PrismFoil" in surface_effect_def_id:
+                split_6_prism_count += 1
+            if "Ink" in surface_effect_def_id:
+                split_6_ink_count += 1
+            if "GoldFoil" in surface_effect_def_id:
+                split_6_gold_count += 1
+            if "Comic" in reveal_effect_def_id:
+                split_6_comic_count += 1
+            if "Glimmer" in reveal_effect_def_id:
+                split_6_glimmer_count += 1
+            if "Sparkle" in reveal_effect_def_id:
+                split_6_sparkle_count += 1
+            if "Kirby" in reveal_effect_def_id:
+                split_6_kirby_count += 1
 
-    # Add sorted color counts to HTML content
-    for color, count in sorted_colors:
-        percentage = (count / total_splits) * 100
-        html_content += f"<li>{color}: {count} ({percentage:.2f}%)</li>"
+    # Calculate percentages
+    def calculate_percentage(part, whole):
+        return (part / whole) * 100 if whole > 0 else 0
 
-    # Append additional stats to HTML content
-    html_content += f"""
-                    </ul>
-                </div>
-                <div class="column right">
-                    <h2>Your Nemesis:</h2>
-                    <p>{unluckiest_card}</p>
-                    <br>
-                    <p>Longest Ink drought: {longest_ink_drought[1]['Max Ink Drought']}</p>
-                    <p class="cards">{longest_ink_drought[0]}</p>
-                    <p>Longest Gold drought: {longest_gold_drought[1]['Max Gold Drought']}</p>
-                    <p class="cards">{longest_gold_drought[0]}</p>
-                    <p>Longest Kirby drought: {longest_kirby_drought[1]['Max Kirby Drought']}</p>
-                    <p class="cards">{longest_kirby_drought[0]}</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+    # General statistics
+    ink_hits_percentage = calculate_percentage(ink_hits, ink_rolls)
+    gold_hits_percentage = calculate_percentage(gold_hits, gold_rolls)
+    kirby_hits_percentage = calculate_percentage(kirby_hits, kirby_rolls)
+    sparkle_hits_percentage = calculate_percentage(sparkle_hits, gold_rolls)
+    comic_hits_percentage = calculate_percentage(comic_hits, comic_glimmer_rolls)
+    glimmer_hits_percentage = calculate_percentage(glimmer_hits, comic_glimmer_rolls)
 
-    # Write HTML content to file
-    with open(output_file, 'w', encoding='utf-8') as file:
-        file.write(html_content)
+    # Split 2-3 statistics
+    split_2_3_foil_percentage = calculate_percentage(split_2_3_foil_count, split_2_3_total)
+    split_2_3_prism_percentage = calculate_percentage(split_2_3_prism_count, split_2_3_total)
+    split_2_3_comic_percentage = calculate_percentage(split_2_3_comic_count, split_2_3_total)
+    split_2_3_glimmer_percentage = calculate_percentage(split_2_3_glimmer_count, split_2_3_total)
 
-    print(f"HTML summary written to {output_file}")
+    # Split 4 statistics
+    split_4_foil_percentage = calculate_percentage(split_4_foil_count, split_4_total)
+    split_4_prism_percentage = calculate_percentage(split_4_prism_count, split_4_total)
+    split_4_ink_percentage = calculate_percentage(split_4_ink_count, split_4_total)
+    split_4_comic_percentage = calculate_percentage(split_4_comic_count, split_4_total)
+    split_4_glimmer_percentage = calculate_percentage(split_4_glimmer_count, split_4_total)
+    split_4_sparkle_percentage = calculate_percentage(split_4_sparkle_count, split_4_total)
 
-    # Write summary statistics to the top of the output.txt
-    summary_text = f"""
-Total splits: {total_splits}
-Ink Rolls: {ink_rolls}
-Ink Hits: {ink_hits} ({ink_hits_percentage:.2f}%)
-Gold Rolls: {gold_rolls}
-Gold Hits: {gold_hits} ({gold_hits_percentage:.2f}%)
-Kirby Rolls: {krackle_rolls}
-Kirby Hits: {krackle_hits} ({krackle_hits_percentage:.2f}%)
-Ink & Kirby Hits: {ink_krackle_hits} ({ink_krackle_hits_percentage:.2f}%)
-Gold & Kirby Hits: {gold_krackle_hits} ({gold_krackle_hits_percentage:.2f}%)
+    # Split 5 statistics
+    split_5_foil_percentage = calculate_percentage(split_5_foil_count, split_5_total)
+    split_5_prism_percentage = calculate_percentage(split_5_prism_count, split_5_total)
+    split_5_ink_percentage = calculate_percentage(split_5_ink_count, split_5_total)
+    split_5_gold_percentage = calculate_percentage(split_5_gold_count, split_5_total)
+    split_5_comic_percentage = calculate_percentage(split_5_comic_count, split_5_total)
+    split_5_glimmer_percentage = calculate_percentage(split_5_glimmer_count, split_5_total)
+    split_5_sparkle_percentage = calculate_percentage(split_5_sparkle_count, split_5_total)
 
-Most Split Characters
-"""
+    # Split 6 statistics
+    split_6_foil_percentage = calculate_percentage(split_6_foil_count, split_6_total)
+    split_6_prism_percentage = calculate_percentage(split_6_prism_count, split_6_total)
+    split_6_ink_percentage = calculate_percentage(split_6_ink_count, split_6_total)
+    split_6_gold_percentage = calculate_percentage(split_6_gold_count, split_6_total)
+    split_6_comic_percentage = calculate_percentage(split_6_comic_count, split_6_total)
+    split_6_glimmer_percentage = calculate_percentage(split_6_glimmer_count, split_6_total)
+    split_6_sparkle_percentage = calculate_percentage(split_6_sparkle_count, split_6_total)
+    split_6_kirby_percentage = calculate_percentage(split_6_kirby_count, split_6_total)
 
-    # Add most split characters to summary
-    for card, count in sorted_card_counts:
-        summary_text += f"{card} - {count} copies\n"
+    # Write statistics to file
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        outfile.write(f"Total Splits: {total_splits}\n")
+        outfile.write("-\n")
+        outfile.write(f"Foil hits: {foil_hits}\n")
+        outfile.write(f"Prism hits: {prism_hits}\n")
+        outfile.write(f"Ink hits: {ink_hits} ({ink_hits_percentage:.2f}%)\n")
+        outfile.write(f"Gold hits: {gold_hits} ({gold_hits_percentage:.2f}%)\n")
+        outfile.write("-\n")
+        outfile.write(f"Ink Rolls: {ink_rolls}\n")
+        outfile.write(f"Gold Rolls: {gold_rolls}\n")
+        outfile.write("-\n")
+        outfile.write(f"Comic hits: {comic_hits} ({comic_hits_percentage:.2f}%)\n")
+        outfile.write(f"Glimmer hits: {glimmer_hits} ({glimmer_hits_percentage:.2f}%)\n")
+        outfile.write(f"Sparkle hits: {sparkle_hits} ({sparkle_hits_percentage:.2f}%)\n")
+        outfile.write(f"Kirby hits: {kirby_hits} ({kirby_hits_percentage:.2f}%)\n")
+        outfile.write("-\n")
+        outfile.write(f"Comic & Glimmer Rolls: {comic_glimmer_rolls}\n")
+        outfile.write(f"Kirby Rolls: {kirby_rolls}\n")
+        outfile.write("-\n")
+        outfile.write(f"Split 2-3\nTotal: {split_2_3_total}\n")
+        outfile.write(f"Foil count: {split_2_3_foil_count} ({split_2_3_foil_percentage:.2f}%)\n")
+        outfile.write(f"Prism count: {split_2_3_prism_count} ({split_2_3_prism_percentage:.2f}%)\n")
+        outfile.write(f"Glimmer count: {split_2_3_glimmer_count} ({split_2_3_glimmer_percentage:.2f}%)\n")
+        outfile.write(f"Comic count: {split_2_3_comic_count} ({split_2_3_comic_percentage:.2f}%)\n")
+        outfile.write("-\n")
+        outfile.write(f"Split 4\nTotal: {split_4_total}\n")
+        outfile.write(f"Foil count: {split_4_foil_count} ({split_4_foil_percentage:.2f}%)\n")
+        outfile.write(f"Prism count: {split_4_prism_count} ({split_4_prism_percentage:.2f}%)\n")
+        outfile.write(f"Ink count: {split_4_ink_count} ({split_4_ink_percentage:.2f}%)\n")
+        outfile.write(f"Glimmer count: {split_4_glimmer_count} ({split_4_glimmer_percentage:.2f}%)\n")
+        outfile.write(f"Comic count: {split_4_comic_count} ({split_4_comic_percentage:.2f}%)\n")
+        outfile.write(f"Sparkle count: {split_4_sparkle_count} ({split_4_sparkle_percentage:.2f}%)\n")
+        outfile.write("-\n")
+        outfile.write(f"Split 5\nTotal: {split_5_total}\n")
+        outfile.write(f"Foil count: {split_5_foil_count} ({split_5_foil_percentage:.2f}%)\n")
+        outfile.write(f"Prism count: {split_5_prism_count} ({split_5_prism_percentage:.2f}%)\n")
+        outfile.write(f"Ink count: {split_5_ink_count} ({split_5_ink_percentage:.2f}%)\n")
+        outfile.write(f"Gold count: {split_5_gold_count} ({split_5_gold_percentage:.2f}%)\n")
+        outfile.write(f"Glimmer count: {split_5_glimmer_count} ({split_5_glimmer_percentage:.2f}%)\n")
+        outfile.write(f"Comic count: {split_5_comic_count} ({split_5_comic_percentage:.2f}%)\n")
+        outfile.write(f"Sparkle count: {split_5_sparkle_count} ({split_5_sparkle_percentage:.2f}%)\n")
+        outfile.write("-\n")
+        outfile.write(f"Split 6\nTotal: {split_6_total}\n")
+        outfile.write(f"Foil count: {split_6_foil_count} ({split_6_foil_percentage:.2f}%)\n")
+        outfile.write(f"Prism count: {split_6_prism_count} ({split_6_prism_percentage:.2f}%)\n")
+        outfile.write(f"Ink count: {split_6_ink_count} ({split_6_ink_percentage:.2f}%)\n")
+        outfile.write(f"Gold count: {split_6_gold_count} ({split_6_gold_percentage:.2f}%)\n")
+        outfile.write(f"Glimmer count: {split_6_glimmer_count} ({split_6_glimmer_percentage:.2f}%)\n")
+        outfile.write(f"Comic count: {split_6_comic_count} ({split_6_comic_percentage:.2f}%)\n")
+        outfile.write(f"Sparkle count: {split_6_sparkle_count} ({split_6_sparkle_percentage:.2f}%)\n")
+        outfile.write(f"Kirby count: {split_6_kirby_count} ({split_6_kirby_percentage:.2f}%)\n")
 
-    summary_text += "Color Counts\n"
-
-    # Add sorted color counts to summary
-    for color, count in sorted_colors:
-        percentage = (count / total_splits) * 100
-        summary_text += f"{color}: {count} ({percentage:.2f}%)\n"
-
-    summary_text += f"""
-Your lucky character is {luckiest_card}
-Your nemesis is {unluckiest_card}
-
-Highest Ink Streak: {streaks['highest_ink_streak']['length']} ({', '.join(streaks['highest_ink_streak']['cards'])})
-Longest Ink drought: {longest_ink_drought[1]['Max Ink Drought']} ({longest_ink_drought[0]})
-Highest Gold Streak: {streaks['highest_gold_streak']['length']} ({', '.join(streaks['highest_gold_streak']['cards'])})
-Longest Gold drought: {longest_gold_drought[1]['Max Gold Drought']} ({longest_gold_drought[0]})
-Highest Kirby Streak: {streaks['highest_kirby_streak']['length']} ({', '.join(streaks['highest_kirby_streak']['cards'])})
-Longest Kirby drought: {longest_kirby_drought[1]['Max Kirby Drought']} ({longest_kirby_drought[0]})
-"""
-
-    try:
-        with open(OUTPUT_PATH, 'w', encoding='utf-8') as outfile:
-            outfile.write(summary_text)
-            for line in lines:
-                outfile.write(line)
-        print("Summary statistics added to output.txt")
-    except IOError as e:
-        print(f"Error: IOError - {e}")
+    print(f"Statistics written to {output_file}")
 
 def additional_stats(input_file):
     cards = parse_output_file(input_file)
@@ -464,16 +525,180 @@ def find_streaks(cards, card_rolls):
 
     return streaks
 
+def generate_html_summary(input_file, output_file):
+    """Generate HTML summary."""
+    # Read the input file
+    with open(input_file, 'r') as file:
+        lines = file.readlines()
+
+    # Dictionary to count occurrences of each card
+    card_counts = {}
+    total_splits = 0
+    ink_hits = 0
+    gold_hits = 0
+    krackle_hits = 0
+    ink_krackle_hits = 0
+    gold_krackle_hits = 0
+
+    # Dictionary to count color occurrences
+    color_counts = {
+        "Black": 0,
+        "Gold": 0,
+        "Green": 0,
+        "Blue": 0,
+        "Red": 0,
+        "White": 0,
+        "Purple": 0,
+        "Rainbow": 0
+    }
+
+    for line in lines:
+        total_splits += 1
+        parts = line.split()
+        card_name = parts[0]
+
+        if card_name in card_counts:
+            card_counts[card_name] += 1
+        else:
+            card_counts[card_name] = 1
+
+        # Check for additional criteria
+        if "Ink" in line:
+            ink_hits += 1
+        if "GoldFoil" in line:
+            gold_hits += 1
+        if "Kirby" in line:
+            krackle_hits += 1
+        if "Ink" in line and "Kirby" in line:
+            ink_krackle_hits += 1
+        if "GoldFoil" in line and "Kirby" in line:
+            gold_krackle_hits += 1
+
+        # Check for colors in the reveal effect
+        for color in color_counts.keys():
+            if color in parts[2]:
+                color_counts[color] += 1
+
+    # Calculate Ink Rolls, Gold Rolls, and Krackle Rolls
+    ink_rolls = 0
+    gold_rolls = 0
+    krackle_rolls = 0
+    for count in card_counts.values():
+        if count >= 4:
+            ink_rolls += (count - 3)
+        if count >= 5:
+            gold_rolls += (count - 4)
+        if count >= 6:
+            krackle_rolls += (count - 5)
+
+    # Calculate percentages relative to their respective rolls
+    ink_hits_percentage = (ink_hits / ink_rolls) * 100 if ink_rolls > 0 else 0
+    gold_hits_percentage = (gold_hits / gold_rolls) * 100 if gold_rolls > 0 else 0
+    krackle_hits_percentage = (krackle_hits / krackle_rolls) * 100 if krackle_rolls > 0 else 0
+    ink_krackle_hits_percentage = (ink_krackle_hits / krackle_rolls) * 100 if krackle_rolls > 0 else 0
+    gold_krackle_hits_percentage = (gold_krackle_hits / krackle_rolls) * 100 if krackle_rolls > 0 else 0
+
+    # Sort colors by count in descending order
+    sorted_colors = sorted(color_counts.items(), key=lambda item: item[1], reverse=True)
+
+    # Get additional statistics
+    luckiest_card, unluckiest_card, streaks, longest_ink_drought, longest_gold_drought, longest_kirby_drought = additional_stats(input_file)
+
+    # Generate HTML content
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Game Data Summary</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="popup">
+            <div class="header">
+                <h1>Game Data Summary</h1>
+            </div>
+            <div class="columns">
+                <div class="column left">
+                    <h2>Your Lucky Character:</h2>
+                    <p>{luckiest_card}</p>
+                    <br>
+                    <p>Highest Ink Streak: {streaks['highest_ink_streak']['length']}</p>
+                    <p class="cards">{', '.join(streaks['highest_ink_streak']['cards'])}</p>
+                    <p>Highest Gold Streak: {streaks['highest_gold_streak']['length']}</p>
+                    <p class="cards">{', '.join(streaks['highest_gold_streak']['cards'])}</p>
+                    <p>Highest Kirby Streak: {streaks['highest_kirby_streak']['length']}</p>
+                    <p class="cards">{', '.join(streaks['highest_kirby_streak']['cards'])}</p>
+                </div>
+                <div class="column center">
+                    <h2>Statistics</h2>
+                    <p>Total splits: {total_splits}</p>
+                    <p>Ink Rolls: {ink_rolls}</p>
+                    <p>Ink Hits: {ink_hits} ({ink_hits_percentage:.2f}%)</p>
+                    <p>Gold Rolls: {gold_rolls}</p>
+                    <p>Gold Hits: {gold_hits} ({gold_hits_percentage:.2f}%)</p>
+                    <p>Kirby Rolls: {krackle_rolls}</p>
+                    <p>Kirby Hits: {krackle_hits} ({krackle_hits_percentage:.2f}%)</p>
+                    <p>Ink & Kirby Hits: {ink_krackle_hits} ({ink_krackle_hits_percentage:.2f}%)</p>
+                    <p>Gold & Kirby Hits: {gold_krackle_hits} ({gold_krackle_hits_percentage:.2f}%)</p>
+                    <h2>Most Split Characters</h2>
+                    <ul>
+    """
+
+    # Get top 3 cards with the most copies
+    sorted_card_counts = sorted(card_counts.items(), key=lambda item: item[1], reverse=True)[:3]
+    for card, count in sorted_card_counts:
+        html_content += f"<li>{card} - {count} copies</li>"
+
+    html_content += "</ul><h2>Flare Color Breakdown</h2><ul>"
+
+    # Add sorted color counts to HTML content
+    total_colors = sum(color_counts.values())
+    for color, count in sorted_colors:
+        percentage = (count / total_colors) * 100
+        html_content += f"<li>{color}: {count} ({percentage:.2f}%)</li>"
+
+    # Append additional stats to HTML content
+    html_content += f"""
+                    </ul>
+                </div>
+                <div class="column right">
+                    <h2>Your Nemesis:</h2>
+                    <p>{unluckiest_card}</p>
+                    <br>
+                    <p>Longest Ink drought: {longest_ink_drought[1]['Max Ink Drought']}</p>
+                    <p class="cards">{longest_ink_drought[0]}</p>
+                    <p>Longest Gold drought: {longest_gold_drought[1]['Max Gold Drought']}</p>
+                    <p class="cards">{longest_gold_drought[0]}</p>
+                    <p>Longest Kirby drought: {longest_kirby_drought[1]['Max Kirby Drought']}</p>
+                    <p class="cards">{longest_kirby_drought[0]}</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Write HTML content to file
+    with open(output_file, 'w', encoding='utf-8') as file:
+        file.write(html_content)
+
+    print(f"HTML summary written to {output_file}")
+
 def main():
     # Assuming CollectionState.json is located at ~/AppData/Locallow/Second Dinner/SNAP/Standalone/States/nvprod/
     file_path = os.path.expanduser('~/AppData/Locallow/Second Dinner/SNAP/Standalone/States/nvprod/CollectionState.json')
 
-    # Process the JSON file and generate the output.txt
+    # Process the JSON file and generate the rawlist.txt
     if not process_collection_state(file_path):
         return
     
+    # Generate the statistics
+    analyze_statistics(RAWLIST_PATH, STATISTICS_PATH)
+
     # Generate the summary as HTML
-    summarize_cards(OUTPUT_PATH, SUMMARY_PATH)
+    generate_html_summary(RAWLIST_PATH, SUMMARY_PATH)
 
     # Open the generated HTML file in a web browser
     subprocess.Popen(['start', '', SUMMARY_PATH], shell=True)
