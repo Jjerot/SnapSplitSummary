@@ -15,7 +15,7 @@ Release version:
 1. Unzip folder
 2. Run ImportSnap.exe
    
-Alternatively, if you are uncomfortable downloading it as an .exe, I've included a batch file with the python script version. 
+Alternatively, if you are uncomfortable downloading it as an .exe, I've included a batch file with source code.
 
 1. Unzip folder
 2. Click ImportSnap.bat
