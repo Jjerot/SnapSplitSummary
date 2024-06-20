@@ -11,7 +11,7 @@ This program does not collect or share your information; everything is run local
 -Marvel Snap installed through Steam, may have to play a game for information to update. 
 
 # Usage
-Downloading for new users: on the right hand side of the page below the "About" section, under "Releases" click "Snap Split Summary (Latest)"
+*Downloading for new users: on the right hand side of the page below the "About" section, under "Releases" click "Snap Split Summary (Latest)"*
 
 Release version:
 1. Unzip SnapSplitSummary.zip
@@ -22,10 +22,10 @@ Alternatively, if you are uncomfortable downloading it as an .exe, I've included
 1. Unzip folder
 2. Click ImportSnap.bat
 
-Note: This will require Python 3.11 or later (probably works on earlier versions, untested) (Download from Python.org)
+*Note: This will require Python 3.11 or later (probably works on earlier versions, untested) (Download from Python.org)*
 
 # What the code does exactly;
-CollectionState.json contains a wide variety of information, including a full list of all of your cards, variants, and splits. This script looks specifically at the "Cards" subsection and creates a chronological list of cards with a foil, prism, ink, or gold background, disregarding any custom cards. This is simplified to (CardDefId) (SurfaceEffectDefId) (CardRevealEffectDefId) (TimeCreated), E.g. "AmericaChavez GoldFoil KirbyRed 2023-02-16T03\:24:41.045Z". Additional formatting changes are made to non-specific flare names such as "Sparkle" to "SparkleRainbow" for clarity as Rainbow isn't listed like other flare colors. This is saved to rawlist.txt
+CollectionState.json contains a wide variety of information, including a full list of all your cards, avatars, titles, deck, etc. This script looks specifically at the "Cards" subsection and creates a chronological list of each split with a foil, prism, ink, or gold background, disregarding any custom cards. This is simplified to (CardDefId) (SurfaceEffectDefId) (CardRevealEffectDefId) (TimeCreated), E.g. "AmericaChavez GoldFoil KirbyRed 2023-02-16T03\:24:41.045Z". Additional formatting changes are made to non-specific flare names such as "Sparkle" to "SparkleRainbow" for clarity as Rainbow isn't listed like other flare colors. This is saved to rawlist.txt
 
 It then goes through the cleaned output to generate a summary which includes; 
 
@@ -41,4 +41,4 @@ It then goes through the cleaned output to generate a summary which includes;
 
 -Calculates your "luckiest" and "unluckiest" (nemesis) cards based on their total number of splits and how many desirable outcomes they've rolled. 
 
-This is then saved to summary.html and displayed after the program is run
+This is then saved to statistics.txt and summary.html to be displayed after the program is run
