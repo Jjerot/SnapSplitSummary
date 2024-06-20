@@ -27,16 +27,16 @@ CollectionState.json contains a wide variety of information, including a full li
 
 It then goes through the cleaned output to generate a summary which includes; 
 
--Total splits
+-Total of all splits
 
 -The number of each background and flare and total number of possible rolls for each
 
 -A count of all flare colors
 
--Number of Splits per character (top 3 are displayed)
+-Number of splits per character
 
--A breakdown of what you've found on splits 2-3, 4, 5, and 6 precisely. (How many times you hit ink/gold/krackle on the first possible split, useful stats for data collection should you wish to share them)
+-A breakdown of what you've found on splits 2-3, 4, 5, and 6 exactly. (How many times you hit ink/gold/krackle on the first possible split, useful stats for data collection should you wish to share them)
 
 -Calculates your "luckiest" and "unluckiest" (nemesis) cards based on their total number of splits and how many desirable outcomes they've rolled. 
 
-This is saved to summary.html and displayed after the program is run
+This is then saved to summary.html and displayed after the program is run
